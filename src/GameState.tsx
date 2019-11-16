@@ -3,21 +3,24 @@ import {observable, computed, action, decorate} from "mobx";
 type Direction = number;
 export { Direction };
 
-export type UnitId = number;
+export class Position {
+    x: number;
+    y: number;
+}
 
 export interface MoveCommand {
     tag: "move";
-    unit: UnitId;
+    location: Position;
     direction: Direction;
 }
 
-export interface AttackCommand {
-    tag: "attack";
-    unit: UnitId;
+export interface SplitCommand {
+    tag: "split";
+    location: Position;
     direction: Direction;
 }
 
-export type Command = MoveCommand | AttackCommand;
+export type Command = MoveCommand | SplitCommand;
 
 export class Player {
     money: number = 99;
@@ -26,17 +29,41 @@ export class Player {
     }
 }
 
-export class GameState {
-    board = [1,2,3,4,5];
+export class BoardState {
+    board : number[] = [1,2,3,4,5];
+    width: number;
 
+    private getBoardIndex(p : Position) : number {
+        return p.y * this.width + p.x;
+    }
+
+    executeMove(move: MoveCommand) {
+
+    }
+}
+
+export class GameState {
     players : Player[] = [];
+    commands: [Command]
 
     constructor() {
         this.players.push(new Player(99));
     }
 
-    executeCommand(command: Command) {
-        // todo
+    /** Adds the command to the current round */
+    addCommand(command: Command) {
+        this.commands.push(command);
+    }
+
+    /** Take all the commands in the queue and resolve them */
+    executeRound() {
+        for (let command in this.commands) {
+            switch (this.commands[command].tag) {
+                case "move":
+
+                break;
+            }
+        }
     }
 }
 
