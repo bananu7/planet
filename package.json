@@ -20,6 +20,7 @@
     "@types/react-dom": "^16.9.4",
     "@webpack-cli/serve": "^0.2.0",
     "babel-loader": "^8.0.5",
+    "bs-platform": "^5.2.1",
     "copy-webpack-plugin": "^5.0.5",
     "ts-loader": "^6.2.1",
     "typescript": "^3.7.2",
