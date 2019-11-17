@@ -67,7 +67,17 @@ export class Renderer extends React.Component<RendererProps, RendererState> {
                     && this.state.selectedTile.x === x
                     && this.state.selectedTile.y === y ? true : false;
 
-                let clickHandler = () => this.handleTileSelect(new Position(x,y));
+                let clickHandler = () => {
+                    if (!this.state.selectedTile)
+                        this.handleTileSelect(new Position(x,y));
+                    else {
+                        this.props.gameState.makeMove({
+                            position: this.state.selectedTile,
+                            destination: new Position(x,y)
+                        })
+                        this.setState({selectedTile: undefined});
+                    }
+                };
 
                 tiles.push(<Tile
                     key={x+"_"+y}

@@ -137,7 +137,7 @@ export class GameState {
                 height: this.board.getWidth(),
                 getTileAt: (p: Position) => this.board.getTileAt(p)
             },
-            makeMove: (m: Command) => {}
+            makeMove: this.executeCommand.bind(this)
         }
     }
 }
