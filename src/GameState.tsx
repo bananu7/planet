@@ -7,8 +7,10 @@ const UNIT_SIZE_LIMIT = 99;
 
 export class Player {
     name: string;
-    constructor( name: string) {
+    colour: string;
+    constructor(name: string, colour: string) {
         this.name = name;
+        this.colour = colour
     }
 }
 
@@ -25,14 +27,22 @@ export class BoardState {
         return Math.random() > 0.3 ? TerrainType.Grass : TerrainType.Water;
     }
 
-    constructor(width: number, height: number) {
+    constructor(width: number, height: number, startingUnits: [[number, number], Unit][]) {
         this.width = width;
         this.height = height;
         this.board = [];
 
         for (let y = 0; y < width; y++) {
             for (let x = 0; x < width; x++) {
-                this.board.push(new BoardTile(BoardState.randomTerrain()));
+                let tile = new BoardTile(BoardState.randomTerrain());
+
+                for (let u of startingUnits) {
+                    if (u[0][0] === x && u[0][1] === y) {
+                        tile.unit = u[1];
+                    }
+                }
+
+                this.board.push(tile);
             }
         }
     }
@@ -79,8 +89,13 @@ export class GameState {
     board: BoardState;
 
     constructor() {
-        this.players.push(new Player("Bartek"));
-        this.board = new BoardState(20, 20);
+        this.players.push(new Player("Bartek", "red"));
+
+        let startingUnits : [[number, number], Unit][] = [
+            [[1, 1], new Unit("Bartek", 10)]
+        ];
+
+        this.board = new BoardState(20, 20, startingUnits);
     }
 
     /** Adds the command to the current round */
@@ -109,7 +124,8 @@ export class GameState {
                 width: this.board.getWidth(),
                 height: this.board.getWidth(),
                 getTileAt: (p: Position) => this.board.getTileAt(p)
-            }
+            },
+            makeMove: (m: Command) => {}
         }
     }
 }

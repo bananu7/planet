@@ -1,4 +1,4 @@
-import {TerrainType, Unit, BoardTile} from "./Model";
+import {TerrainType, Unit, BoardTile, Command} from "./Model";
 import {Position} from "./Position";
 
 export interface Board {
@@ -9,11 +9,12 @@ export interface Board {
 
 export interface Player {
     name: string;
+    colour: string;
 }
 
 export interface GameState {
     players: Player[];
     board: Board;
 
-    makeMove(command: Command);
+    makeMove(command: Command) : void;
 }

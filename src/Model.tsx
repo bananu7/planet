@@ -10,6 +10,11 @@ export enum TerrainType {
 export class Unit {
     player: string;
     count: number;
+
+    constructor(player: string, count: number) {
+    	this.player = player;
+    	this.count = count;
+    }
 }
 
 export class City {
