@@ -14,4 +14,6 @@ export interface Player {
 export interface GameState {
     players: Player[];
     board: Board;
+
+    makeMove(command: Command);
 }

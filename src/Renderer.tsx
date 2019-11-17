@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as ViewModel from './GameViewModel';
+import {TerrainType} from './Model';
 import {Position, Direction} from "./Position";
 import {GameUI} from './UI';
 
@@ -29,7 +30,7 @@ export class Renderer extends React.Component<Props> {
 		for (let x = 0; x < board.width; x++) {
 			for (let y = 0; y < board.width; y++) {
 				let boardTile = board.getTileAt(new Position(x,y));
-				let colour = "green";
+				let colour = boardTile.terrain == TerrainType.Grass ? "green" : "darkblue";
 
 				tiles.push(<Tile key={x+"_"+y} colour={colour} />);
 			}

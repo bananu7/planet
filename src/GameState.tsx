@@ -1,24 +1,9 @@
 import {observable, computed, action, decorate} from "mobx";
-import {TerrainType, Unit, BoardTile} from "./Model";
+import {TerrainType, Unit, BoardTile, MoveCommand, SplitCommand, Command} from "./Model";
 import {Position, Direction} from "./Position";
 import * as ViewModel from "./GameViewModel";
 
 const UNIT_SIZE_LIMIT = 99;
-
-export interface MoveCommand {
-    tag: "move";
-    position: Position;
-    direction: Direction;
-}
-
-export interface SplitCommand {
-    tag: "split";
-    position: Position;
-    direction: Direction;
-    amount: number;
-}
-
-export type Command = MoveCommand | SplitCommand;
 
 export class Player {
     name: string;
