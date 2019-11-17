@@ -41,6 +41,10 @@ interface RendererState {
 
 export class Renderer extends React.Component<RendererProps, RendererState> {
     handleTileSelect(p: Position) {
+        let boardTile = this.props.gameState.board.getTileAt(p);
+        if (!boardTile.unit)
+            return;
+
         this.setState({
             selectedTile: p
         });
