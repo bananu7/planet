@@ -1,39 +1,9 @@
 import {observable, computed, action, decorate} from "mobx";
+import {TerrainType, Unit, BoardTile} from "./Model";
+import {Position, Direction} from "./Position";
+import * as ViewModel from "./GameViewModel";
 
 const UNIT_SIZE_LIMIT = 99;
-
-enum Direction {
-    Up,
-    Down,
-    Left,
-    Right
-}
-
-export class Position {
-    x: number;
-    y: number;
-    constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
-    }
-
-    translated(x: number, y: number) : Position {
-        return new Position(this.x + x, this.y + y);
-    }
-
-    modified(d: Direction) : Position {
-        switch (d) {
-            case Direction.Up:
-                return this.translated(0, -1);
-            case Direction.Down:
-                return this.translated(0, 1);
-            case Direction.Left:
-                return this.translated(0, -1);
-            case Direction.Right:
-                return this.translated(0, 1);
-        }
-    }
-}
 
 export interface MoveCommand {
     tag: "move";
@@ -51,43 +21,47 @@ export interface SplitCommand {
 export type Command = MoveCommand | SplitCommand;
 
 export class Player {
-    money: number = 99;
-    constructor(money: number) {
-        this.money = money;
+    name: string;
+    constructor( name: string) {
+        this.name = name;
     }
-}
-
-enum TerrainType {
-    Grass,
-    Water
-}
-
-class Unit {
-    player: string;
-    count: number;
-}
-
-class BoardTile {
-    terrain: TerrainType;
-    unit?: Unit;
 }
 
 export class BoardState {
     board : BoardTile[];
     width: number;
+    height: number;
 
     private getBoardIndex(p: Position) : number {
         return p.y * this.width + p.x;
     }
 
-    private getBoardTile(p: Position) : BoardTile {
+    private static randomTerrain() : TerrainType {
+        return Math.random() > 0.3 ? TerrainType.Grass : TerrainType.Water;
+    }
+
+    constructor(width: number, height: number) {
+        this.width = width;
+        this.height = height;
+        this.board = [];
+
+        for (let y = 0; y < width; y++) {
+            for (let x = 0; x < width; x++) {
+                this.board.push(new BoardTile(BoardState.randomTerrain()));
+            }
+        }
+    }
+
+    getTileAt(p: Position) : BoardTile {
         return this.board[this.getBoardIndex(p)];
     }
 
+    getWidth() : number { return this.width; }
+    getHeight() : number { return this.height; }
 
     executeMove(move: MoveCommand) {
-        let tileA = this.getBoardTile(move.position);
-        let tileB = this.getBoardTile(move.position.modified(move.direction));
+        let tileA = this.getTileAt(move.position);
+        let tileB = this.getTileAt(move.position.modified(move.direction));
 
         
         if (tileB.unit) {
@@ -120,7 +94,8 @@ export class GameState {
     board: BoardState;
 
     constructor() {
-        this.players.push(new Player(99));
+        this.players.push(new Player("Bartek"));
+        this.board = new BoardState(20, 20);
     }
 
     /** Adds the command to the current round */
@@ -138,6 +113,17 @@ export class GameState {
                 case "split":
                     this.board.executeSplit(command);
                 break;
+            }
+        }
+    }
+
+    createViewModel() : ViewModel.GameState {
+        return {
+            players: this.players.map(x => x),
+            board: {
+                width: this.board.getWidth(),
+                height: this.board.getWidth(),
+                getTileAt: (p: Position) => this.board.getTileAt(p)
             }
         }
     }
