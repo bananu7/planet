@@ -33,17 +33,7 @@ export class BoardTile {
 
 /* User input */
 
-export interface MoveCommand {
-    tag: "move";
+export interface Command {
     position: Position;
-    direction: Direction;
+    destination: Position;
 }
-
-export interface SplitCommand {
-    tag: "split";
-    position: Position;
-    direction: Direction;
-    amount: number;
-}
-
-export type Command = MoveCommand | SplitCommand;

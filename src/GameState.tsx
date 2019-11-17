@@ -1,5 +1,5 @@
 import {observable, computed, action, decorate} from "mobx";
-import {TerrainType, Unit, BoardTile, MoveCommand, SplitCommand, Command} from "./Model";
+import {TerrainType, Unit, BoardTile, Command} from "./Model";
 import {Position, Direction} from "./Position";
 import * as ViewModel from "./GameViewModel";
 
@@ -54,11 +54,29 @@ export class BoardState {
     getWidth() : number { return this.width; }
     getHeight() : number { return this.height; }
 
-    executeMove(move: MoveCommand) {
-        let tileA = this.getTileAt(move.position);
-        let tileB = this.getTileAt(move.position.modified(move.direction));
+    spawnUnitsFor(playerName: string) {
+        for (let y = 0; y < this.width; y++) {
+            for (let x = 0; x < this.width; x++) {
+                let tile = this.getTileAt(new Position(x,y));
 
-        
+                if (!tile.city) continue;
+                if (tile.city.owner !== playerName) continue;
+
+                if (!tile.unit)
+                    tile.unit = new Unit(playerName, 10);
+                else
+                    tile.unit.count += 10;
+
+                if (tile.unit.count > UNIT_SIZE_LIMIT)
+                    tile.unit.count = UNIT_SIZE_LIMIT;
+            }
+        }
+    }
+
+    executeCommand(move: Command) {
+        let tileA = this.getTileAt(move.position);
+        let tileB = this.getTileAt(move.destination);
+
         if (tileB.unit) {
             if (tileB.unit.player != tileA.unit.player) { // fight
 
@@ -77,19 +95,15 @@ export class BoardState {
             tileA.unit = null;
         }
     }
-
-    executeSplit(move: SplitCommand) {
-
-    }
 }
 
 export class GameState {
-    players : Player[] = [];
-    commands: [Command];
+    otherPlayers : Player[] = [];
+    currentPlayer: Player = null;
     board: BoardState;
 
     constructor() {
-        this.players.push(new Player("Bartek", "red"));
+        this.currentPlayer = new Player("Bartek", "red");
 
         let startingUnits : [[number, number], Unit][] = [
             [[1, 1], new Unit("Bartek", 10)]
@@ -98,28 +112,28 @@ export class GameState {
         this.board = new BoardState(20, 20, startingUnits);
     }
 
-    /** Adds the command to the current round */
-    addCommand(command: Command) {
-        this.commands.push(command);
+    executeCommand(command: Command) {
+        this.board.executeCommand(command);
     }
 
-    /** Take all the commands in the queue and resolve them */
-    executeRound() {
-        for (let command of this.commands) {
-            switch (command.tag) {
-                case "move":
-                    this.board.executeMove(command);
-                break;
-                case "split":
-                    this.board.executeSplit(command);
-                break;
-            }
-        }
+    private spawnUnits() {
+        this.board.spawnUnitsFor(this.currentPlayer.name);
+    }
+
+    private advanceToNextPlayer() {
+        this.otherPlayers.push(this.currentPlayer);
+        this.currentPlayer = this.otherPlayers.shift();
+    }
+
+    endRound() {
+        this.spawnUnits();
+        this.advanceToNextPlayer();
     }
 
     createViewModel() : ViewModel.GameState {
         return {
-            players: this.players.map(x => x),
+            otherPlayers: this.otherPlayers.map(x => x),
+            currentPlayer: this.currentPlayer,
             board: {
                 width: this.board.getWidth(),
                 height: this.board.getWidth(),
