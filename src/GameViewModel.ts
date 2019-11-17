@@ -13,8 +13,7 @@ export interface Player {
 }
 
 export interface GameState {
-    currentPlayer: Player;
-    otherPlayers: Player[];
+    players: Player[];
     board: Board;
 
     makeMove(command: Command) : void;

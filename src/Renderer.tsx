@@ -48,7 +48,7 @@ export class Renderer extends React.Component<RendererProps, RendererState> {
 
     constructor(props: any) {
         super(props);
-        this.state = {selectedTile: null};
+        this.state = {selectedTile: undefined};
 
         this.handleTileSelect = this.handleTileSelect.bind(this);
     }
@@ -62,9 +62,10 @@ export class Renderer extends React.Component<RendererProps, RendererState> {
                 let boardTile = board.getTileAt(new Position(x,y));
                 let colour = boardTile.terrain == TerrainType.Grass ? "green" : "darkblue"
                 let selected : boolean = 
-                    this.state.selectedTile !== null
+                    this.state
+                    && this.state.selectedTile
                     && this.state.selectedTile.x === x
-                    && this.state.selectedTile.y === y;
+                    && this.state.selectedTile.y === y ? true : false;
 
                 let clickHandler = () => this.handleTileSelect(new Position(x,y));
 

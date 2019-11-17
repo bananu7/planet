@@ -77,13 +77,13 @@ export class BoardState {
         let tileA = this.getTileAt(move.position);
         let tileB = this.getTileAt(move.destination);
 
-        if (tileB.unit) {
+        if (tileA.unit && tileB.unit) {
             if (tileB.unit.player != tileA.unit.player) { // fight
 
             } else { // merge
                 if (tileA.unit.count + tileB.unit.count <= UNIT_SIZE_LIMIT) {
                     tileB.unit.count += tileA.unit.count;
-                    tileA.unit = null;
+                    tileA.unit = undefined;
                 } else {
                     tileA.unit.count = UNIT_SIZE_LIMIT - (tileA.unit.count + tileB.unit.count);
                     tileB.unit.count = UNIT_SIZE_LIMIT;
@@ -92,48 +92,46 @@ export class BoardState {
             }
         } else {
             tileB.unit = tileA.unit;
-            tileA.unit = null;
+            tileA.unit = undefined;
         }
     }
 }
 
 export class GameState {
-    otherPlayers : Player[] = [];
-    currentPlayer: Player = null;
-    board: BoardState;
+    private players : Player[] = [];
+    private board: BoardState;
 
     constructor() {
-        this.currentPlayer = new Player("Bartek", "red");
+        this.players.push(new Player("Bartek", "red"));
 
         let startingUnits : [[number, number], Unit][] = [
             [[1, 1], new Unit("Bartek", 10)]
         ];
 
-        this.board = new BoardState(20, 20, startingUnits);
+        this.board = new BoardState(15, 15, startingUnits);
     }
 
     executeCommand(command: Command) {
         this.board.executeCommand(command);
     }
 
-    private spawnUnits() {
-        this.board.spawnUnitsFor(this.currentPlayer.name);
+    private advanceToNextPlayer() {        
+        // TODO make sure this.players is never empty
+        this.players.push(this.players.shift()!);
     }
 
-    private advanceToNextPlayer() {
-        this.otherPlayers.push(this.currentPlayer);
-        this.currentPlayer = this.otherPlayers.shift();
+    get currentPlayer() : Player {
+        return this.players[0];
     }
 
     endRound() {
-        this.spawnUnits();
+        this.board.spawnUnitsFor(this.currentPlayer.name);
         this.advanceToNextPlayer();
     }
 
-    createViewModel() : ViewModel.GameState {
+    get viewModel() : ViewModel.GameState {
         return {
-            otherPlayers: this.otherPlayers.map(x => x),
-            currentPlayer: this.currentPlayer,
+            players: this.players.map(x => x),
             board: {
                 width: this.board.getWidth(),
                 height: this.board.getWidth(),
@@ -143,10 +141,3 @@ export class GameState {
         }
     }
 }
-
-decorate(GameState, {
-    board: observable,
-    players: observable,
-    commands: observable,
-    executeCommand: action
-})
